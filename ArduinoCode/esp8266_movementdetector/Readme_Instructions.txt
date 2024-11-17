@@ -61,10 +61,10 @@ DFRobot Sensor                  ESP8266 (NodeMCU)
 
 - **Software:**
   - Install the required libraries:
-    - `ESP8266WiFi`
-    - `PubSubClient`
-    - `SoftwareSerial`
-    - `DFRobot_HumanDetection`
+    - `ESP8266WiFi` (should come with the Board, else: https://github.com/esp8266/Arduino/tree/master/libraries)
+    - `PubSubClient` (by Nick O'Leary: https://pubsubclient.knolleary.net/)
+    - `SoftwareSerial` (https://docs.arduino.cc/learn/built-in-libraries/software-serial/)
+    - `DFRobot_HumanDetection` (https://github.com/DFRobot/DFRobot_HumanDetection/tree/master)
 
 ### **Usage**
 1. Load the script onto the ESP8266 using the Arduino IDE.
