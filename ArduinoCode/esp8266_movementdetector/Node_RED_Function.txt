@@ -1,0 +1,60 @@
+// Set adjustable thresholds
+const THRESHOLD_ON = 25;      // Trigger "on" for Output 1
+const THRESHOLD_OFF = 20;     // Trigger "off" for Output 1
+const THRESHOLD_LOW = 15;     // Low threshold for Output 2
+const LOW_COUNT_TRIGGER = 5;  // Consecutive low readings to trigger Output 2
+
+// State storage
+context.set("belowLowCount", context.get("belowLowCount") || 0);
+context.set("stateOutput1", context.get("stateOutput1") || "off");
+
+let belowLowCount = context.get("belowLowCount");
+let stateOutput1 = context.get("stateOutput1");
+
+// Input payload
+let value = msg.payload;
+
+// Prepare outputs
+let output1 = null;
+let output2 = null;
+
+// Logic
+if (value >= THRESHOLD_ON) {
+    // If value is >= 25, trigger "on" for Output 1 and reset count
+    if (stateOutput1 !== "on") {
+        output1 = "on";
+        stateOutput1 = "on";
+        context.set("stateOutput1", stateOutput1);
+    }
+    belowLowCount = 0;
+} else if (value < THRESHOLD_OFF) {
+    // If value is < 20, trigger "off" for Output 1
+    if (stateOutput1 !== "off") {
+        output1 = "off";
+        stateOutput1 = "off";
+        context.set("stateOutput1", stateOutput1);
+    }
+
+    // If value is below 15, increment the low count
+    if (value < THRESHOLD_LOW) {
+        belowLowCount++;
+        context.set("belowLowCount", belowLowCount);
+
+        // If low count reaches the threshold, trigger Output 2 "on"
+        if (belowLowCount >= LOW_COUNT_TRIGGER) {
+            output2 = "on";
+            belowLowCount = 0; // Reset count after triggering Output 2
+            context.set("belowLowCount", belowLowCount);
+        }
+    } else {
+        // Reset low count if value is above the low threshold
+        belowLowCount = 0;
+        context.set("belowLowCount", belowLowCount);
+    }
+}
+
+// Outputs
+return [
+    output1 !== null ? { payload: output1 } : null, // Output 1
+    output2 !== null ? { payload: output2 } : null  // Output 2
+];
