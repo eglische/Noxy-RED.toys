@@ -1,0 +1,480 @@
+[
+    {
+        "id": "9f81e0f35561e4a2",
+        "type": "tab",
+        "label": "ESP32_NogasmMQTT",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "a8ce0da95b0e995a",
+        "type": "mqtt in",
+        "z": "9f81e0f35561e4a2",
+        "name": "",
+        "topic": "/sensorbt/status",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "mqtt_broker",
+        "nl": true,
+        "rap": false,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 300,
+        "wires": [
+            [
+                "21598f23ebe2a42a",
+                "8ec3bdc2bf2729bd"
+            ]
+        ]
+    },
+    {
+        "id": "21598f23ebe2a42a",
+        "type": "function",
+        "z": "9f81e0f35561e4a2",
+        "name": "gate",
+        "func": "// Context to store the state of the gate (open or closed)\nif (!context.get('gateState')) {\n    context.set('gateState', 'off'); // Default state is 'off'\n}\n\nswitch (msg.payload) {\n    case 'on!':\n        context.set('gateState', 'on');\n        node.status({ fill: \"green\", shape: \"dot\", text: \"Gate is ON\" });\n        return null; // Do not forward the 'on!' command\n\n    case 'off!':\n        context.set('gateState', 'off');\n        node.status({ fill: \"red\", shape: \"ring\", text: \"Gate is OFF\" });\n        return null; // Do not forward the 'off!' command\n\n    default:\n        // Route messages to output1 if the gate is 'on', otherwise to output2\n        if (context.get('gateState') === 'on') {\n            return [msg, null]; // Route to output1\n        } else {\n            return [null, msg]; // Route to output2\n        }\n}\n",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 320,
+        "wires": [
+            [
+                "13727b04255742ae"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "8ec3bdc2bf2729bd",
+        "type": "debug",
+        "z": "9f81e0f35561e4a2",
+        "name": "contraction detection",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 200,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "13727b04255742ae",
+        "type": "switch",
+        "z": "9f81e0f35561e4a2",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "spike",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "cleared",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 850,
+        "y": 220,
+        "wires": [
+            [
+                "1949497521ee5f5d"
+            ],
+            [
+                "09b784c6c5490fa7"
+            ]
+        ]
+    },
+    {
+        "id": "f9d4af1a4b6dcf79",
+        "type": "change",
+        "z": "9f81e0f35561e4a2",
+        "name": "on",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "on!",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 350,
+        "y": 120,
+        "wires": [
+            [
+                "21598f23ebe2a42a"
+            ]
+        ]
+    },
+    {
+        "id": "2acc7af5a5a9403a",
+        "type": "change",
+        "z": "9f81e0f35561e4a2",
+        "name": "off",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "off!",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 350,
+        "y": 160,
+        "wires": [
+            [
+                "21598f23ebe2a42a"
+            ]
+        ]
+    },
+    {
+        "id": "85d66ea8c9fe94b0",
+        "type": "inject",
+        "z": "9f81e0f35561e4a2",
+        "name": "Turn the detection ON",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 120,
+        "wires": [
+            [
+                "f9d4af1a4b6dcf79"
+            ]
+        ]
+    },
+    {
+        "id": "08807b188588f4ef",
+        "type": "inject",
+        "z": "9f81e0f35561e4a2",
+        "name": "Turn the detection OFF",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 160,
+        "wires": [
+            [
+                "2acc7af5a5a9403a"
+            ]
+        ]
+    },
+    {
+        "id": "1132543805d67ea2",
+        "type": "comment",
+        "z": "9f81e0f35561e4a2",
+        "name": "This is a Gate to enable/disable the detection",
+        "info": "",
+        "x": 630,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "836903b35ae9120c",
+        "type": "mqtt out",
+        "z": "9f81e0f35561e4a2",
+        "name": "",
+        "topic": "/sensorbt/command",
+        "qos": "2",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "71195d9c993607f7",
+        "x": 580,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "4f88d31bd1cc72bc",
+        "type": "inject",
+        "z": "9f81e0f35561e4a2",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "start",
+        "payloadType": "str",
+        "x": 210,
+        "y": 580,
+        "wires": [
+            [
+                "836903b35ae9120c"
+            ]
+        ]
+    },
+    {
+        "id": "a5f7b5cdbf732885",
+        "type": "inject",
+        "z": "9f81e0f35561e4a2",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "stop",
+        "payloadType": "str",
+        "x": 210,
+        "y": 620,
+        "wires": [
+            [
+                "836903b35ae9120c"
+            ]
+        ]
+    },
+    {
+        "id": "bbecfecf1a91dac4",
+        "type": "inject",
+        "z": "9f81e0f35561e4a2",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "sensitivity:50",
+        "payloadType": "str",
+        "x": 230,
+        "y": 660,
+        "wires": [
+            [
+                "836903b35ae9120c"
+            ]
+        ]
+    },
+    {
+        "id": "124389c24656400c",
+        "type": "inject",
+        "z": "9f81e0f35561e4a2",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "gain:1",
+        "payloadType": "str",
+        "x": 210,
+        "y": 700,
+        "wires": [
+            [
+                "836903b35ae9120c"
+            ]
+        ]
+    },
+    {
+        "id": "086073b43b6ba047",
+        "type": "comment",
+        "z": "9f81e0f35561e4a2",
+        "name": "Example for the ESP32 NogasmMQTT in Node Red",
+        "info": "",
+        "x": 210,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "26edebed65cfdcda",
+        "type": "debug",
+        "z": "9f81e0f35561e4a2",
+        "name": "This will enable for example a stroker with a timed delay",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1400,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "09b784c6c5490fa7",
+        "type": "delay",
+        "z": "9f81e0f35561e4a2",
+        "name": "Random Delay",
+        "pauseType": "random",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "10",
+        "randomLast": "15",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1020,
+        "y": 340,
+        "wires": [
+            [
+                "26edebed65cfdcda"
+            ]
+        ]
+    },
+    {
+        "id": "1949497521ee5f5d",
+        "type": "debug",
+        "z": "9f81e0f35561e4a2",
+        "name": "Stop your Stroker/Vibrator from here",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1300,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "51c8f407343fde6e",
+        "type": "comment",
+        "z": "9f81e0f35561e4a2",
+        "name": "Example how to send Commands back to the ESP32_NogasmMQTT",
+        "info": "",
+        "x": 260,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "mqtt_broker",
+        "type": "mqtt-broker",
+        "name": "Local MQTT",
+        "broker": "172.28.0.2",
+        "port": "1883",
+        "clientid": "NodeRed_Client",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "71195d9c993607f7",
+        "type": "mqtt-broker",
+        "name": "HOIT MQTT",
+        "broker": "192.168.1.5",
+        "port": "1883",
+        "clientid": "temp",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
